@@ -67,40 +67,40 @@ const fetchImageList = async (): Promise<PicsumImage[]> => {
 };
 
 // Fetch và cache ảnh vào IndexedDB
-const fetchAndCacheImage = async (img: GalleryImage) => {
-  const db = await dbPromise;
+// const fetchAndCacheImage = async (img: GalleryImage) => {
+//   const db = await dbPromise;
 
-  // Kiểm tra cache trước
-  const cached = await db.get("image-cache", img.id);
-  if (cached) {
-    img.objectUrl = URL.createObjectURL(cached.blob);
-    img.cached = true;
-    img.loading = false;
-    return;
-  }
+//   // Kiểm tra cache trước
+//   const cached = await db.get("image-cache", img.id);
+//   if (cached) {
+//     img.objectUrl = URL.createObjectURL(cached.blob);
+//     img.cached = true;
+//     img.loading = false;
+//     return;
+//   }
 
-  // Fetch từ network nếu chưa cache
-  try {
-    const response = await fetch(img.displayUrl);
-    const blob = await response.blob();
+//   // Fetch từ network nếu chưa cache
+//   try {
+//     const response = await fetch(img.displayUrl);
+//     const blob = await response.blob();
 
-    // Lưu vào IndexedDB
-    await db.put("image-cache", {
-      id: img.id,
-      author: img.author,
-      url: img.displayUrl,
-      blob,
-      cachedAt: Date.now(),
-    });
+//     // Lưu vào IndexedDB
+//     await db.put("image-cache", {
+//       id: img.id,
+//       author: img.author,
+//       url: img.displayUrl,
+//       blob,
+//       cachedAt: Date.now(),
+//     });
 
-    img.objectUrl = URL.createObjectURL(blob);
-    img.cached = false; // Vừa tải mới
-    img.loading = false;
-  } catch (error) {
-    console.error("Lỗi tải ảnh:", img.id, error);
-    img.loading = false;
-  }
-};
+//     img.objectUrl = URL.createObjectURL(blob);
+//     img.cached = false; // Vừa tải mới
+//     img.loading = false;
+//   } catch (error) {
+//     console.error("Lỗi tải ảnh:", img.id, error);
+//     img.loading = false;
+//   }
+// };
 
 // Load tất cả ảnh - ưu tiên từ cache
 const loadImages = async () => {
