@@ -43,7 +43,7 @@ Mặc dù IndexedDB rất mạnh, nhưng không phải là "viên đạn bạc" 
 
 ## 2. Tư duy cốt lõi (Core Concepts) 🧠
 
-Để làm chủ IndexedDB, bạn cần hiểu 4 khái niệm sau (tưởng tượng như một **Tủ hồ sơ**):
+Để làm chủ IndexedDB, bạn cần hiểu 5 khái niệm sau (tưởng tượng như một **Tủ hồ sơ**):
 
 1.  **Database (Cơ sở dữ liệu)**:
 
@@ -62,8 +62,15 @@ Mặc dù IndexedDB rất mạnh, nhưng không phải là "viên đạn bạc" 
     - Giúp bạn tìm kiếm cực nhanh (Ví dụ: tìm theo _Email_ hoặc _Tuổi_) mà không cần lật từng hồ sơ một.
 
 4.  **Transaction (Giao dịch)**:
+
     - Là quy tắc **"Làm xong hết hoặc không làm gì cả"**.
     - Mọi thao tác đọc/ghi đều phải nằm trong một Transaction. Nếu đang ghi mà lỗi -> Tự động hoàn tác (Rollback) như chưa có gì xảy ra. An toàn tuyệt đối!
+
+5.  **Cursor (Con trỏ)**:
+
+    - Là **"ngón tay"** duyệt qua từng hồ sơ một trong ngăn kéo.
+    - Thay vì lấy hết 10,000 hồ sơ ra bàn (RAM), Cursor cho phép bạn đọc từng cái một, xử lý xong thì lấy tiếp.
+    - Đặc biệt hữu ích khi dữ liệu quá lớn hoặc cần cập nhật/xóa hàng loạt.
 
 ---
 
@@ -314,7 +321,213 @@ const filtered = all.filter((u) => u.name.includes("an"));
 
 ---
 
-## 6. Best Practices & "Bẫy" thường gặp ⚠️
+## 6. Cursor - Duyệt dữ liệu hiệu quả 🔄
+
+**Cursor** là một "con trỏ" di chuyển qua từng record trong Object Store hoặc Index. Nó đặc biệt hữu ích khi:
+
+- Dữ liệu quá lớn để load hết vào bộ nhớ (`getAll()` có thể gây crash).
+- Cần xử lý từng dòng một (streaming).
+- Muốn dừng sớm khi tìm thấy kết quả mong muốn.
+
+### 6.1. Cursor là gì?
+
+Tưởng tượng bạn có **100,000 hồ sơ** trong ngăn kéo. Thay vì đổ hết ra bàn (RAM), Cursor cho phép bạn:
+
+1. Mở ngăn kéo
+2. Lấy từng hồ sơ một
+3. Xử lý xong thì lấy tiếp (hoặc dừng)
+
+```
+┌─────────────────────────────────────────┐
+│           Object Store "users"          │
+├─────────────────────────────────────────┤
+│  [Record 1] ← Cursor bắt đầu ở đây      │
+│  [Record 2]                             │
+│  [Record 3] ← cursor.continue() → tiếp  │
+│  [Record 4]                             │
+│  [Record 5]                             │
+│     ...                                 │
+│  [Record N] ← Cursor kết thúc           │
+└─────────────────────────────────────────┘
+```
+
+### 6.2. Sử dụng Cursor (Vanilla JS)
+
+```javascript
+const request = indexedDB.open("MyDatabase", 1);
+
+request.onsuccess = (event) => {
+  const db = event.target.result;
+  const tx = db.transaction(["users"], "readonly");
+  const store = tx.objectStore("users");
+
+  // Mở cursor
+  const cursorRequest = store.openCursor();
+
+  cursorRequest.onsuccess = (e) => {
+    const cursor = e.target.result;
+
+    if (cursor) {
+      console.log("Key:", cursor.key);
+      console.log("Value:", cursor.value);
+
+      // Di chuyển đến record tiếp theo
+      cursor.continue();
+    } else {
+      console.log("Đã duyệt hết tất cả records!");
+    }
+  };
+};
+```
+
+### 6.3. Sử dụng Cursor với thư viện `idb`
+
+Thư viện `idb` cung cấp API đơn giản hơn với `iterate()`:
+
+```typescript
+// Duyệt tất cả users
+const tx = db.transaction("users", "readonly");
+const store = tx.objectStore("users");
+
+let cursor = await store.openCursor();
+
+while (cursor) {
+  console.log("User:", cursor.value);
+
+  // Xử lý logic ở đây...
+
+  // Tiếp tục duyệt
+  cursor = await cursor.continue();
+}
+```
+
+### 6.4. Cursor với Index và Range
+
+Cursor có thể kết hợp với **Index** và **IDBKeyRange** để duyệt có điều kiện:
+
+```typescript
+// Duyệt users từ 20-30 tuổi theo thứ tự tuổi
+const tx = db.transaction("users", "readonly");
+const index = tx.objectStore("users").index("by-age");
+const range = IDBKeyRange.bound(20, 30);
+
+let cursor = await index.openCursor(range);
+
+while (cursor) {
+  console.log(`${cursor.value.name} - ${cursor.value.age} tuổi`);
+  cursor = await cursor.continue();
+}
+```
+
+### 6.5. Cursor Direction (Hướng duyệt)
+
+Cursor có thể duyệt theo nhiều hướng:
+
+| Direction    | Mô tả                               |
+| :----------- | :---------------------------------- |
+| `next`       | Duyệt từ đầu đến cuối (mặc định)    |
+| `prev`       | Duyệt từ cuối về đầu (đảo ngược)    |
+| `nextunique` | Duyệt từ đầu, bỏ qua key trùng lặp  |
+| `prevunique` | Duyệt từ cuối, bỏ qua key trùng lặp |
+
+```typescript
+// Duyệt ngược (từ cuối về đầu)
+let cursor = await store.openCursor(null, "prev");
+
+// Duyệt và bỏ qua các giá trị index trùng nhau
+let cursor = await index.openCursor(null, "nextunique");
+```
+
+### 6.6. Cập nhật/Xóa với Cursor
+
+Cursor còn cho phép **cập nhật** hoặc **xóa** record ngay tại vị trí hiện tại:
+
+```typescript
+const tx = db.transaction("users", "readwrite");
+const store = tx.objectStore("users");
+
+let cursor = await store.openCursor();
+
+while (cursor) {
+  const user = cursor.value;
+
+  // Ví dụ: Tăng tuổi của tất cả users lên 1
+  if (user.age < 100) {
+    user.age += 1;
+    await cursor.update(user); // Cập nhật tại chỗ
+  }
+
+  // Hoặc xóa users inactive
+  if (user.status === "inactive") {
+    await cursor.delete(); // Xóa record hiện tại
+  }
+
+  cursor = await cursor.continue();
+}
+
+await tx.done;
+```
+
+### 6.7. Pagination với Cursor (Phân trang)
+
+Một use case phổ biến là **phân trang** dữ liệu lớn:
+
+```typescript
+/**
+ * Lấy dữ liệu theo trang
+ * @param page - Số trang (bắt đầu từ 1)
+ * @param pageSize - Số record mỗi trang
+ */
+const getPage = async (page: number, pageSize: number) => {
+  const tx = db.transaction("users", "readonly");
+  const store = tx.objectStore("users");
+
+  const results: User[] = [];
+  const skip = (page - 1) * pageSize;
+  let skipped = 0;
+
+  let cursor = await store.openCursor();
+
+  while (cursor && results.length < pageSize) {
+    // Bỏ qua các record của trang trước
+    if (skipped < skip) {
+      skipped++;
+      cursor = await cursor.continue();
+      continue;
+    }
+
+    results.push(cursor.value);
+    cursor = await cursor.continue();
+  }
+
+  return results;
+};
+
+// Sử dụng
+const page1 = await getPage(1, 10); // 10 users đầu tiên
+const page2 = await getPage(2, 10); // 10 users tiếp theo
+```
+
+### 6.8. So sánh `getAll()` vs `Cursor`
+
+| Tiêu chí                 | `getAll()`                    | `Cursor`                           |
+| :----------------------- | :---------------------------- | :--------------------------------- |
+| **Bộ nhớ (RAM)**         | Load hết → Rủi ro cao nếu lớn | Load từng dòng → An toàn           |
+| **Tốc độ khởi tạo**      | Chậm hơn (đợi load hết)       | Nhanh (bắt đầu ngay)               |
+| **Dừng sớm**             | ❌ Không thể                  | ✅ Có thể (`break` bất cứ lúc nào) |
+| **Cập nhật/Xóa tại chỗ** | ❌ Phải gọi riêng             | ✅ `cursor.update()` / `delete()`  |
+| **Code đơn giản**        | ✅ Một dòng                   | ❌ Cần vòng lặp                    |
+| **Phù hợp khi**          | Data nhỏ (< 1,000 records)    | Data lớn hoặc cần streaming        |
+
+**💡 Quy tắc ngón tay cái:**
+
+- Dưới 1,000 records → Dùng `getAll()` cho đơn giản
+- Trên 10,000 records → **BẮT BUỘC** dùng Cursor
+- Cần update/delete hàng loạt → Dùng Cursor
+
+---
+
+## 7. Best Practices & "Bẫy" thường gặp ⚠️
 
 1.  **Đừng chặn UI**: Dù IndexedDB là Async, nhưng nếu bạn đọc/ghi 10,000 dòng một lúc mà không chia nhỏ (batching), browser vẫn có thể bị "khựng". Hãy dùng **Cursor** để duyệt từng dòng hoặc chia nhỏ tác vụ.
 2.  **Quản lý Version cẩn thận**: Khi muốn thêm Index mới hay Store mới, BẮT BUỘC phải tăng version trong `openDB`. Nếu không, code `upgrade` sẽ không bao giờ chạy.
@@ -323,7 +536,7 @@ const filtered = all.filter((u) => u.name.includes("an"));
 
 ---
 
-## 7. Tổng kết
+## 8. Tổng kết
 
 IndexedDB là "vũ khí bí mật" cho các ứng dụng Web hiệu năng cao. Nó hơi khó lúc đầu, nhưng khi đã hiểu tư duy **Database - Store - Index**, bạn sẽ thấy nó cực kỳ mạnh mẽ.
 
