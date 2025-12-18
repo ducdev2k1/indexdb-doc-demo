@@ -23,6 +23,11 @@ const router = createRouter({
   history: createWebHistory(),
   routes,
   scrollBehavior(to, from, savedPosition) {
+    // chay localhost thì mới console
+    if (import.meta.env.MODE === "ducnd") {
+      console.log("🚀 index.ts ~ from :>>", from);
+      console.log("🚀 index.ts ~ to :>>", to);
+    }
     if (savedPosition) {
       return savedPosition;
     } else {
