@@ -1,173 +1,295 @@
-# Hướng dẫn IndexDB cho người mới bắt đầu 🚀
+# 📘 Hướng dẫn Toàn diện về IndexedDB: Từ A-Z
 
-Chào mừng bạn đến với tài liệu hướng dẫn về **IndexedDB**! Đây là nơi chúng ta sẽ tìm hiểu về cách lưu trữ dữ liệu lớn ngay trên trình duyệt một cách hiệu quả.
-
----
-
-## 1. IndexedDB là gì? 🤔
-
-**IndexedDB** là một hệ thống cơ sở dữ liệu NoSQL transactional mức thấp (low-level) được tích hợp sẵn trong trình duyệt. Nó cho phép bạn lưu trữ một lượng lớn dữ liệu có cấu trúc (bao gồm cả File/Blob) và thực hiện tìm kiếm nhanh chóng qua các index (chỉ mục).
-
-### Tại sao lại cần IndexedDB?
-
-Trong khi `localStorage` rất tiện lợi, nó lại có giới hạn dung lượng nhỏ (khoảng 5MB) và chỉ lưu được chuỗi (string). IndexedDB sinh ra để giải quyết bài toán:
-
-- **Lưu trữ lớn**: Vài trăm MB đến vài GB (tùy trình duyệt và ổ cứng).
-- **Hiệu năng cao**: Hoạt động bất đồng bộ (Asynchronous), không làm đơ giao diện khi đọc/ghi nhiều.
-- **Dữ liệu phức tạp**: Lưu được Object, Array, Date, File, Blob, Image... mà không cần ép kiểu về chuỗi JSON.
+Chào mừng bạn đến với **Cẩm nang IndexedDB**! Tài liệu này sẽ đưa bạn từ một người mới bắt đầu trở thành chuyên gia về lưu trữ dữ liệu phía Client.
 
 ---
 
-## 2. So sánh IndexDB vs LocalStorage vs SessionStorage 📊
+## 1. Mở đầu: Tại sao lại là IndexedDB? 🤔
 
-Dưới đây là bảng so sánh nhanh giúp bạn dễ hình dung:
+Trong thế giới Web hiện đại, chúng ta không chỉ hiển thị thông tin mà còn chạy các ứng dụng phức tạp (PWA, Web App). Nhu cầu lưu trữ dữ liệu **LỚN** và **NHANH** ngay trên trình duyệt là bắt buộc.
 
-| Đặc điểm           | IndexedDB 🗄️                                 | LocalStorage 📦                     | SessionStorage ⏳       |
-| :----------------- | :------------------------------------------- | :---------------------------------- | :---------------------- |
-| **Dung lượng**     | **Rất lớn** (>500MB hoặc % ổ cứng)           | **Nhỏ** (~5-10MB)                   | **Nhỏ** (~5MB)          |
-| **Kiểu dữ liệu**   | String, Number, Object, Array, Blob, File... | Chỉ **String**                      | Chỉ **String**          |
-| **Cơ chế**         | **Bất đồng bộ (Async)** (Không chặn UI)      | **Đồng bộ (Sync)** (Có thể chặn UI) | **Đồng bộ (Sync)**      |
-| **Thời gian sống** | Vĩnh viễn (đến khi user xóa)                 | Vĩnh viễn (đến khi user xóa)        | Mất khi tắt tab/browser |
-| **Tìm kiếm**       | Có hỗ trợ Index (Tìm cực nhanh)              | Không (Phải duyệt tuần tự)          | Không                   |
-| **Sử dụng khi**    | App offline, cache ảnh/file, lưu data lớn    | Setting đơn giản, token, theme      | Data tạm thời của phiên |
+### So sánh nhanh các công nghệ lưu trữ
 
----
-
-## 3. Dữ liệu được lưu ở đâu? 📍
-
-Bạn có thể xem trực tiếp dữ liệu IndexedDB của mình ngay trên trình duyệt:
-
-1.  Mở **DevTools** (F12 hoặc chuột phải -> Inspect).
-2.  Chuyển sang tab **Application**.
-3.  Ở menu bên trái, tìm mục **Storage** -> **IndexedDB**.
-4.  Tại đây bạn sẽ thấy các Database, Object Store (giống Table) và dữ liệu bên trong.
+| Đặc điểm            | IndexedDB 🗄️                       | LocalStorage 📦             | Cookies 🍪        |
+| :------------------ | :--------------------------------- | :-------------------------- | :---------------- |
+| 💾 **Dung lượng**   | **Rất lớn** (>Hundreds MB)         | **Nhỏ** (~5MB)              | **Rất nhỏ** (4KB) |
+| 🔢 **Kiểu dữ liệu** | Object, Array, Blob, File, Date... | Chỉ String                  | Chỉ String        |
+| ⚡ **Hiệu năng**    | **Async** (Không chặn UI)          | Sync (Chặn UI nếu data lớn) | Sync              |
+| 🔍 **Tìm kiếm**     | Có Index (Tìm siêu nhanh)          | Duyệt tuần tự (Chậm)        | Không             |
+| 💡 **Mục đích**     | App offline, data lớn, cache file  | Config, token, theme        | Auth, tracking    |
 
 ---
 
-## 4. Cách sử dụng (Chưa dùng thư viện - Vanilla JS) 🍦
+## 1.1. Ưu điểm và Nhược điểm (Pros & Cons) ⚖️
 
-Code thuần của IndexedDB dựa trên các sự kiện (`onsuccess`, `onerror`), nên trông sẽ hơi dài và phức tạp hơn (`callback hell`).
+Mặc dù IndexedDB rất mạnh, nhưng không phải là "viên đạn bạc" cho mọi vấn đề.
 
-### Ví dụ cơ bản:
+### ✅ Ưu điểm (Pros)
+
+1.  **Lưu trữ khổng lồ**: Thoải mái lưu hàng GB dữ liệu (phụ thuộc ổ cứng người dùng).
+2.  **Hiệu năng cao**: Cơ chế bất đồng bộ (Async) giúp UI luôn mượt mà kể cả khi ghi đọc file nặng.
+3.  **Hỗ trợ đa dạng**: Lưu được Blob, File, ArrayBuffer trực tiếp (không cần base64).
+4.  **Transaction an toàn**: Đảm bảo toàn vẹn dữ liệu (ACID basics).
+5.  **Offline-first**: Chìa khóa vàng cho các ứng dụng PWA hoạt động không cần mạng.
+
+### ❌ Nhược điểm (Cons)
+
+1.  **API phức tạp**: Code thuần (Vanilla JS) rất rắc rối, nhiều sự kiện (`onsuccess`, `onerror`).
+2.  **Khó Debug**: DevTools hỗ trợ xem dữ liệu nhưng khó thao tác sửa/xóa nhanh như LocalStorage.
+3.  **Tương thích**: Các trình duyệt rất cũ có thể hỗ trợ không đầy đủ (nhưng hiện tại >99% đã Ok).
+4.  **Vấn đề Quota**: Nếu ổ cứng đầy, trình duyệt có thể tự xóa dữ liệu để giải phóng bộ nhớ (ít gặp nhưng có thể xảy ra).
+
+---
+
+## 2. Tư duy cốt lõi (Core Concepts) 🧠
+
+Để làm chủ IndexedDB, bạn cần hiểu 4 khái niệm sau (tưởng tượng như một **Tủ hồ sơ**):
+
+1.  **Database (Cơ sở dữ liệu)**:
+
+    - Là cái **Tủ hồ sơ**. Mỗi ứng dụng có thể có nhiều tủ (Database), nhưng thường chỉ cần một.
+    - _Đặc biệt_: Nó có **Version** (Phiên bản). Khi muốn thay đổi cấu trúc tủ (thêm ngăn), bạn phải tăng Version này lên.
+
+2.  **Object Store (Kho chứa đối tượng)**:
+
+    - Là các **Table (Bảng)** hoặc **Collection**.
+    - Tương đương với **Table** trong SQL hoặc **Collection** trong MongoDB.
+    - Nơi chứa dữ liệu thực tế (User, Product, Order...).
+
+3.  **Index (Chỉ mục)**:
+
+    - Là các **Nhãn dán** bên ngoài hồ sơ.
+    - Giúp bạn tìm kiếm cực nhanh (Ví dụ: tìm theo _Email_ hoặc _Tuổi_) mà không cần lật từng hồ sơ một.
+
+4.  **Transaction (Giao dịch)**:
+    - Là quy tắc **"Làm xong hết hoặc không làm gì cả"**.
+    - Mọi thao tác đọc/ghi đều phải nằm trong một Transaction. Nếu đang ghi mà lỗi -> Tự động hoàn tác (Rollback) như chưa có gì xảy ra. An toàn tuyệt đối!
+
+---
+
+## 3. Dữ liệu được lưu ở đâu trên máy? (Physical Location) 📂
+
+IndexedDB không lưu trên "mây" (Cloud) mà lưu trực tiếp vào ổ cứng máy tính của người dùng (trong thư mục Profile của trình duyệt).
+
+### 📍 Đường dẫn vật lý (Tham khảo)
+
+Nếu bạn muốn mò vào tận nơi để xem file (dù nó được mã hóa/binary khó đọc), đây là địa chỉ thường gặp:
+
+**Google Chrome / Edge (Windows):**
+
+```bash
+%LOCALAPPDATA%\Google\Chrome\User Data\Default\IndexedDB
+# Hoặc Edge:
+%LOCALAPPDATA%\Microsoft\Edge\User Data\Default\IndexedDB
+```
+
+**Firefox (Windows):**
+
+```bash
+%APPDATA%\Mozilla\Firefox\Profiles\<profile-id>\storage\default
+```
+
+**macOS (Chrome):**
+
+```bash
+~/Library/Application Support/Google/Chrome/Default/IndexedDB
+```
+
+### 🛠️ Xem nhanh bằng DevTools (Khuyên dùng)
+
+Thay vì mò vào folder, hãy dùng công cụ có sẵn của trình duyệt:
+
+1.  Nhấn **F12** để mở DevTools.
+2.  Chuyển sang tab **Application** (Chrome/Edge) hoặc **Storage** (Firefox).
+3.  Chọn mục **IndexedDB** ở thanh bên trái.
+4.  Tại đây bạn có thể xem, sửa, xóa dữ liệu trực quan như Excel.
+
+---
+
+## 4. Cách sử dụng (Vanilla JS - Code thuần không thư viện) 🍦
+
+_Dành cho bạn nào muốn hiểu sâu hoặc không muốn phụ thuộc thư viện bên thứ 3._
+
+Cơ chế của Vanilla JS dựa trên sự kiện (Event-based), khá giống `DOM events`.
+
+### 4.1. Mở Database
 
 ```javascript
-// 1. Mở kết nối Database
 const request = indexedDB.open("MyDatabase", 1);
 
-// Chạy khi tạo mới hoặc tăng version (nơi để tạo bảng)
+// Chạy 1 lần duy nhất khi tạo mới hoặc tăng version
 request.onupgradeneeded = (event) => {
   const db = event.target.result;
-  // Tạo Object Store (giống Table) tên là 'users' với key chính là 'id'
   if (!db.objectStoreNames.contains("users")) {
     db.createObjectStore("users", { keyPath: "id" });
   }
 };
 
 request.onsuccess = (event) => {
+  console.log("Mở DB thành công!");
   const db = event.target.result;
-  console.log("Kết nối thành công!");
-
-  // 2. Thêm dữ liệu (Transaction)
-  const transaction = db.transaction(["users"], "readwrite");
-  const store = transaction.objectStore("users");
-
-  const user = { id: 1, name: "Nguyen Van A", role: "Dev" };
-  const addRequest = store.add(user);
-
-  addRequest.onsuccess = () => console.log("Đã thêm user!");
-  addRequest.onerror = () => console.error("Lỗi thêm user");
-};
-
-request.onerror = (event) => {
-  console.error("Lỗi mở DB:", event.target.error);
 };
 ```
 
+### 4.2. Thêm dữ liệu (Transaction)
+
+```javascript
+const addData = (db, user) => {
+  // 1. Tạo Transaction (ghi)
+  const tx = db.transaction(["users"], "readwrite");
+  const store = tx.objectStore("users");
+
+  // 2. Thêm
+  const req = store.add(user);
+
+  req.onsuccess = () => console.log("Thêm thành công!");
+  req.onerror = () => console.error("Lỗi:", req.error);
+};
+```
+
+### 4.3. Lấy dữ liệu
+
+```javascript
+const getData = (db, id) => {
+  const tx = db.transaction(["users"], "readonly");
+  const store = tx.objectStore("users");
+
+  const req = store.get(id);
+  req.onsuccess = () => console.log("User:", req.result);
+};
+```
+
+👉 **Nhận xét**: Bạn sẽ thấy code thuần khá dài dòng ("Callback Hell"). Đó là lý do ta nên dùng thư viện `idb` ở phần dưới.
+
 ---
 
-## 5. Cách sử dụng (Dùng thư viện `idb`) 🛠️
+## 5. Bắt đầu với thư viện `idb` 🛠️
 
-Vì Vanilla JS hơi rườm rà, cộng đồng thường dùng thư viện `idb` (của Jake Archibald - Google) để bọc lại dưới dạng **Promise**, giúp code gọn gàng hơn nhiều với `async/await`.
+Code thuần (Vanilla JS) của IndexedDB rất dài dòng (`onsuccess`, `onerror`). Chúng ta sẽ dùng thư viện **`idb`** (của Google) để code gọn gàng bằng `async/await`.
 
-### Cài đặt:
+### 3.1. Cài đặt
 
 ```bash
 npm install idb
 ```
 
-### Ví dụ tương đương (Dùng `idb`):
+### 3.2. Khởi tạo Database (Mở "Tủ hồ sơ")
 
 ```typescript
-import { openDB } from "idb";
+import { openDB, type DBSchema } from "idb";
 
-async function demoIDB() {
-  // 1. Mở kết nối (Gọn hơn nhiều!)
-  const db = await openDB("MyDatabase", 1, {
-    upgrade(db) {
-      if (!db.objectStoreNames.contains("users")) {
-        db.createObjectStore("users", { keyPath: "id" });
-      }
-    },
-  });
-
-  // 2. Thêm dữ liệu
-  await db.add("users", { id: 1, name: "Nguyen Van A", role: "Dev" });
-  console.log("Đã thêm user!");
-
-  // 3. Đọc dữ liệu
-  const user = await db.get("users", 1);
-  console.log("User lấy được:", user);
-
-  // 4. Lấy tất cả
-  const allUsers = await db.getAll("users");
-}
-```
-
----
-
-## 6. Ví dụ Cache thực tế trong Project 📸
-
-Trong project này, bạn có thể xem file `src/pages/demo/ImageGallery.vue`. Đây là demo cache ảnh (Blob) để app hoạt động offline và tải nhanh hơn.
-
-### Luồng hoạt động (Logic Cache):
-
-1.  **Check Cache**: Khi cần hiển thị ảnh, kiểm tra trong IndexedDB có chưa.
-2.  **Hit Cache**: Nếu có -> Lấy Blob từ DB -> Tạo URL (`URL.createObjectURL`) -> Hiển thị ngay lập tức.
-3.  **Miss Cache**: Nếu chưa có -> Fetch từ server -> Hiển thị -> Lưu Blob vào IndexedDB cho lần sau.
-
-### Code trích đoạn (Minh họa):
-
-```typescript
-// Định nghĩa Schema cho TypeScript
-interface ImageCacheDB extends DBSchema {
-  "image-cache": {
-    key: string; // ID ảnh
-    value: CachedImage; // Object chứa Blob ảnh
+// 1. Định nghĩa kiểu dữ liệu (TypeScript)
+interface MyDB extends DBSchema {
+  users: {
+    key: string;
+    value: { id: string; name: string; email: string; age: number };
+    indexes: { "by-email": string; "by-age": number }; // Các nhãn dán
   };
 }
 
-// Hàm Cache ảnh
-const cacheImages = async (images) => {
-  const db = await dbPromise; // Kết nối DB bằng thư viện idb
+// 2. Mở kết nối
+const db = await openDB<MyDB>("my-database", 1, {
+  upgrade(db) {
+    // Hàm này CHỈ chạy khi tạo mới hoặc tăng version
+    // Nơi duy nhất để tạo Object Store & Index
 
-  for (const img of images) {
-    // 1. Tải ảnh từ mạng về dạng Blob
-    const response = await fetch(img.url);
-    const blob = await response.blob();
+    // Tạo ngăn kéo 'users', dùng 'id' làm khóa chính
+    const store = db.createObjectStore("users", { keyPath: "id" });
 
-    // 2. Lưu Blob vào IndexedDB
-    await db.put("image-cache", {
-      id: img.id,
-      url: img.url,
-      blob: blob, // <--- IndexedDB lưu được cả file Blob!
-      cachedAt: Date.now(),
-    });
-  }
-};
+    // Dán nhãn (Tạo index) để tìm kiếm sau này
+    store.createIndex("by-email", "email", { unique: true }); // Email không trùng
+    store.createIndex("by-age", "age");
+  },
+});
 ```
-
-👉 **Tại sao hay?** `localStorage` không thể lưu Blob hiệu quả (phải convert base64 rất nặng). IndexedDB lưu trực tiếp Blob, nên việc load lại hàng trăm ảnh từ cache cực nhanh và không tốn băng thông mạng.
 
 ---
 
-Hi vọng tài liệu này giúp bạn nắm bắt được IndexedDB! Nếu cần demo chi tiết hơn, bạn cứ mở tab **Demo** trong menu nhé! 😉
+## 4. Thao tác dữ liệu (CRUD) �
+
+### Thêm dữ liệu (Create)
+
+```typescript
+await db.add("users", {
+  id: "user-01",
+  name: "Nguyen Van A",
+  email: "a@example.com",
+  age: 25,
+});
+```
+
+### Đọc dữ liệu (Read)
+
+```typescript
+// Lấy theo ID (Key chính)
+const user = await db.get("users", "user-01");
+
+// Lấy TẤT CẢ
+const allUsers = await db.getAll("users");
+```
+
+### Cập nhật (Update)
+
+```typescript
+// put: Nếu chưa có thì Thêm, có rồi thì Đè (Update)
+await db.put("users", {
+  id: "user-01",
+  name: "Nguyen Van A (Updated)", // Tên mới
+  email: "a@example.com",
+  age: 26,
+});
+```
+
+### Xóa (Delete)
+
+```typescript
+await db.delete("users", "user-01");
+```
+
+---
+
+## 5. Sức mạnh tìm kiếm (Indexes & Range) 🚀
+
+Đây là lý do chính ta chọn IndexedDB thay vì LocalStorage: **Khả năng tìm kiếm mạnh mẽ**.
+
+### Tìm chính xác bằng Index
+
+```typescript
+// Tìm người có email là 'a@example.com'
+// (Nhanh hơn rât nhiều so với lấy tất cả rồi filter)
+const user = await db.getFromIndex("users", "by-email", "a@example.com");
+```
+
+### Tìm theo phạm vi (Range) - "Magic" của IDB 🎩
+
+Bạn muốn tìm user từ 20 đến 30 tuổi?
+
+```typescript
+// IDBKeyRange.bound(lower, upper)
+const range = IDBKeyRange.bound(20, 30);
+const youngUsers = await db.getAllFromIndex("users", "by-age", range);
+```
+
+_Các loại Range khác:_
+
+- `IDBKeyRange.lowerBound(20)`: Từ 20 tuổi trở lên.
+- `IDBKeyRange.upperBound(50)`: Từ 50 tuổi trở xuống.
+- `IDBKeyRange.only(25)`: Đúng 25 tuổi.
+
+---
+
+## 6. Best Practices & "Bẫy" thường gặp ⚠️
+
+1.  **Đừng chặn UI**: Dù IndexedDB là Async, nhưng nếu bạn đọc/ghi 10,000 dòng một lúc mà không chia nhỏ (batching), browser vẫn có thể bị "khựng". Hãy dùng **Cursor** để duyệt từng dòng hoặc chia nhỏ tác vụ.
+2.  **Quản lý Version cẩn thận**: Khi muốn thêm Index mới hay Store mới, BẮT BUỘC phải tăng version trong `openDB`. Nếu không, code `upgrade` sẽ không bao giờ chạy.
+3.  **Lưu Blob/File trực tiếp**: Đừng convert ảnh sang Base64 (String) rồi lưu, nó làm tăng 30% dung lượng và chậm. Hãy lưu thẳng `Blob` vào IndexedDB.
+4.  **Error Handling**: Luôn bọc code trong `try/catch`. Ổ cứng người dùng có thể bị đầy (QuotaExceededError).
+
+---
+
+## 7. Tổng kết
+
+IndexedDB là "vũ khí bí mật" cho các ứng dụng Web hiệu năng cao. Nó hơi khó lúc đầu, nhưng khi đã hiểu tư duy **Database - Store - Index**, bạn sẽ thấy nó cực kỳ mạnh mẽ.
+
+👉 **Muốn xem code chạy thật?**
+Hãy mở tab **Demo** trên menu để xem ứng dụng quản lý User và Cache ảnh thực tế nhé!

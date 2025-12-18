@@ -1,8 +1,30 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, onMounted, onUnmounted, ref } from "vue";
 import ThemeToggle from "./components/ThemeToggle.vue";
 
 const theme = computed(() => localStorage.getItem("theme") || "dark");
+
+// Scroll to Top Logic
+const showScrollButton = ref(false);
+
+const checkScroll = () => {
+  showScrollButton.value = window.scrollY > 300;
+};
+
+const scrollToTop = () => {
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth",
+  });
+};
+
+onMounted(() => {
+  window.addEventListener("scroll", checkScroll);
+});
+
+onUnmounted(() => {
+  window.removeEventListener("scroll", checkScroll);
+});
 </script>
 
 <template>
@@ -61,6 +83,15 @@ const theme = computed(() => localStorage.getItem("theme") || "dark");
               class="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-600 dark:bg-blue-400 group-hover:w-full transition-all duration-300"
             ></span>
           </router-link>
+          <router-link
+            to="/demo/search"
+            class="relative px-3 py-2 font-medium text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors group"
+          >
+            Demo Tìm Kiếm
+            <span
+              class="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-600 dark:bg-blue-400 group-hover:w-full transition-all duration-300"
+            ></span>
+          </router-link>
           <ThemeToggle />
         </div>
       </div>
@@ -81,5 +112,30 @@ const theme = computed(() => localStorage.getItem("theme") || "dark");
         Xây dựng với Vue 3 + TypeScript + idb • IndexedDB Demo & Documentation
       </div>
     </footer>
+
+    <!-- Scroll to Top Button -->
+    <button
+      @click="scrollToTop"
+      class="fixed bottom-8 right-8 p-3 rounded-full bg-blue-600 text-white shadow-lg shadow-blue-600/30 hover:bg-blue-700 hover:-translate-y-1 transition-all duration-300 z-50 flex items-center justify-center opacity-0 translate-y-4"
+      :class="{
+        'opacity-100 translate-y-0': showScrollButton,
+        'pointer-events-none': !showScrollButton,
+      }"
+      aria-label="Scroll to top"
+    >
+      <svg
+        class="w-6 h-6"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M5 10l7-7m0 0l7 7m-7-7v18"
+        ></path>
+      </svg>
+    </button>
   </div>
 </template>

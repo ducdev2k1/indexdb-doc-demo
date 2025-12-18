@@ -13,11 +13,22 @@ const routes = [
     path: "/demo/gallery",
     component: () => import("../pages/demo/ImageGallery.vue"),
   },
+  {
+    path: "/demo/search",
+    component: () => import("../pages/demo/SearchDemo.vue"),
+  },
 ];
 
 const router = createRouter({
   history: createWebHistory(),
   routes,
+  scrollBehavior(to, from, savedPosition) {
+    if (savedPosition) {
+      return savedPosition;
+    } else {
+      return { top: 0, behavior: "smooth" };
+    }
+  },
 });
 
 export default router;

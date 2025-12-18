@@ -7,12 +7,11 @@
   --base-text-weight-normal: 400;
   --base-text-weight-medium: 500;
   --base-text-weight-semibold: 600;
-  --fontStack-monospace: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas,
-    Liberation Mono, monospace;
+  --fontStack-monospace: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace;
   --fgColor-accent: Highlight;
 }
 
-[data-theme="light"] {
+[data-theme='light'] {
   /* light */
   color-scheme: light;
   --focus-outlineColor: #0969da;
@@ -67,7 +66,7 @@
   --color-prettylights-syntax-sublimelinter-gutter-mark: #818b98;
 }
 
-[data-theme="dark"] {
+[data-theme='dark'] {
   /* dark */
   color-scheme: dark;
   --focus-outlineColor: #1f6feb;
@@ -128,8 +127,8 @@
   margin: 0;
   color: var(--fgColor-default);
   /* background-color: var(--bgColor-default); */
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans",
-    Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif,
+    'Apple Color Emoji', 'Segoe UI Emoji';
   font-size: 16px;
   line-height: 1.5;
   word-wrap: break-word;
@@ -149,7 +148,7 @@
 .markdown-body h6:hover .anchor .octicon-link:before {
   width: 16px;
   height: 16px;
-  content: " ";
+  content: ' ';
   display: inline-block;
   background-color: currentColor;
   -webkit-mask-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' version='1.1' aria-hidden='true'><path fill-rule='evenodd' d='M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z'></path></svg>");
@@ -263,26 +262,26 @@
   line-height: inherit;
 }
 
-.markdown-body [type="button"],
-.markdown-body [type="reset"],
-.markdown-body [type="submit"] {
+.markdown-body [type='button'],
+.markdown-body [type='reset'],
+.markdown-body [type='submit'] {
   -webkit-appearance: button;
   appearance: button;
 }
 
-.markdown-body [type="checkbox"],
-.markdown-body [type="radio"] {
+.markdown-body [type='checkbox'],
+.markdown-body [type='radio'] {
   box-sizing: border-box;
   padding: 0;
 }
 
-.markdown-body [type="number"]::-webkit-inner-spin-button,
-.markdown-body [type="number"]::-webkit-outer-spin-button {
+.markdown-body [type='number']::-webkit-inner-spin-button,
+.markdown-body [type='number']::-webkit-outer-spin-button {
   height: auto;
 }
 
-.markdown-body [type="search"]::-webkit-search-cancel-button,
-.markdown-body [type="search"]::-webkit-search-decoration {
+.markdown-body [type='search']::-webkit-search-cancel-button,
+.markdown-body [type='search']::-webkit-search-decoration {
   -webkit-appearance: none;
   appearance: none;
 }
@@ -309,29 +308,23 @@
 
 .markdown-body hr::before {
   display: table;
-  content: "";
+  content: '';
 }
 
 .markdown-body hr::after {
   display: table;
   clear: both;
-  content: "";
+  content: '';
 }
 
 .markdown-body table {
   border-spacing: 0;
-  border-collapse: separate;
-  border-radius: 8px;
-  overflow: hidden;
+  border-collapse: collapse;
   display: block;
   width: max-content;
   max-width: 100%;
-  overflow-x: auto;
+  overflow: auto;
   font-variant: tabular-nums;
-  margin: 2em 0;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
-    0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  border: 1px solid var(--borderColor-default);
 }
 
 .markdown-body td,
@@ -344,25 +337,25 @@
 }
 
 .markdown-body a:focus,
-.markdown-body [role="button"]:focus,
-.markdown-body input[type="radio"]:focus,
-.markdown-body input[type="checkbox"]:focus {
+.markdown-body [role='button']:focus,
+.markdown-body input[type='radio']:focus,
+.markdown-body input[type='checkbox']:focus {
   outline: 2px solid var(--focus-outlineColor);
   outline-offset: -2px;
   box-shadow: none;
 }
 
 .markdown-body a:focus:not(:focus-visible),
-.markdown-body [role="button"]:focus:not(:focus-visible),
-.markdown-body input[type="radio"]:focus:not(:focus-visible),
-.markdown-body input[type="checkbox"]:focus:not(:focus-visible) {
+.markdown-body [role='button']:focus:not(:focus-visible),
+.markdown-body input[type='radio']:focus:not(:focus-visible),
+.markdown-body input[type='checkbox']:focus:not(:focus-visible) {
   outline: solid 1px transparent;
 }
 
 .markdown-body a:focus-visible,
-.markdown-body [role="button"]:focus-visible,
-.markdown-body input[type="radio"]:focus-visible,
-.markdown-body input[type="checkbox"]:focus-visible {
+.markdown-body [role='button']:focus-visible,
+.markdown-body input[type='radio']:focus-visible,
+.markdown-body input[type='checkbox']:focus-visible {
   outline: 2px solid var(--focus-outlineColor);
   outline-offset: -2px;
   box-shadow: none;
@@ -370,10 +363,10 @@
 
 .markdown-body a:not([class]):focus,
 .markdown-body a:not([class]):focus-visible,
-.markdown-body input[type="radio"]:focus,
-.markdown-body input[type="radio"]:focus-visible,
-.markdown-body input[type="checkbox"]:focus,
-.markdown-body input[type="checkbox"]:focus-visible {
+.markdown-body input[type='radio']:focus,
+.markdown-body input[type='radio']:focus-visible,
+.markdown-body input[type='checkbox']:focus,
+.markdown-body input[type='checkbox']:focus-visible {
   outline-offset: 0;
 }
 
@@ -381,16 +374,7 @@
   display: inline-block;
   padding: var(--base-size-4);
   font: 11px
-    var(
-      --fontStack-monospace,
-      ui-monospace,
-      SFMono-Regular,
-      SF Mono,
-      Menlo,
-      Consolas,
-      Liberation Mono,
-      monospace
-    );
+    var(--fontStack-monospace, ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace);
   line-height: 10px;
   color: var(--fgColor-default);
   vertical-align: middle;
@@ -528,13 +512,13 @@
 
 .markdown-body::before {
   display: table;
-  content: "";
+  content: '';
 }
 
 .markdown-body::after {
   display: table;
   clear: both;
-  content: "";
+  content: '';
 }
 
 .markdown-body > *:first-child {
@@ -660,23 +644,23 @@
   list-style-type: none;
 }
 
-.markdown-body ol[type="a s"] {
+.markdown-body ol[type='a s'] {
   list-style-type: lower-alpha;
 }
 
-.markdown-body ol[type="A s"] {
+.markdown-body ol[type='A s'] {
   list-style-type: upper-alpha;
 }
 
-.markdown-body ol[type="i s"] {
+.markdown-body ol[type='i s'] {
   list-style-type: lower-roman;
 }
 
-.markdown-body ol[type="I s"] {
+.markdown-body ol[type='I s'] {
   list-style-type: upper-roman;
 }
 
-.markdown-body ol[type="1"] {
+.markdown-body ol[type='1'] {
   list-style-type: decimal;
 }
 
@@ -718,54 +702,37 @@
 }
 
 .markdown-body table th {
-  font-weight: 600;
-  text-transform: uppercase;
-  font-size: 0.85em;
-  letter-spacing: 0.05em;
-  background-color: var(--bgColor-muted);
-  color: var(--fgColor-default);
-  padding: 12px 16px;
-  border-bottom: 2px solid var(--borderColor-default) !important;
-  text-align: left;
+  font-weight: var(--base-text-weight-semibold, 600);
 }
 
+.markdown-body table th,
 .markdown-body table td {
-  padding: 12px 16px;
-  border-bottom: 1px solid var(--borderColor-muted);
-  color: var(--fgColor-default);
-  transition: background-color 0.2s;
+  padding: 6px 13px;
+  border: 1px solid var(--borderColor-default);
+}
+
+.markdown-body table td > :last-child {
+  margin-bottom: 0;
 }
 
 .markdown-body table tr {
   background-color: var(--bgColor-default);
-  border-top: none;
+  border-top: 1px solid var(--borderColor-muted);
 }
 
-.markdown-body table tr:last-child td {
-  border-bottom: none;
-}
-
-.markdown-body table tr:hover td {
+.markdown-body table tr:nth-child(2n) {
   background-color: var(--bgColor-muted);
-}
-
-.markdown-body table tr:nth-child(2n) {
-  background-color: var(--bgColor-default); /* Reset standard stripe */
-}
-/* Re-apply subtle stripe if desired or keep clean */
-.markdown-body table tr:nth-child(2n) {
-  background-color: rgba(125, 125, 125, 0.02);
 }
 
 .markdown-body table img {
   background-color: transparent;
 }
 
-.markdown-body img[align="right"] {
+.markdown-body img[align='right'] {
   padding-left: 20px;
 }
 
-.markdown-body img[align="left"] {
+.markdown-body img[align='left'] {
   padding-right: 20px;
 }
 
@@ -960,11 +927,11 @@
 }
 
 .markdown-body [data-footnote-ref]::before {
-  content: "[";
+  content: '[';
 }
 
 .markdown-body [data-footnote-ref]::after {
-  content: "]";
+  content: ']';
 }
 
 .markdown-body .footnotes {
@@ -994,7 +961,7 @@
   bottom: calc(var(--base-size-8) * -1);
   left: calc(var(--base-size-24) * -1);
   pointer-events: none;
-  content: "";
+  content: '';
   border: 2px solid var(--borderColor-accent-emphasis);
   border-radius: 6px;
 }
@@ -1131,8 +1098,8 @@
   color: var(--color-prettylights-syntax-constant-other-reference-link);
 }
 
-.markdown-body [role="button"]:focus:not(:focus-visible),
-.markdown-body [role="tabpanel"][tabindex="0"]:focus:not(:focus-visible),
+.markdown-body [role='button']:focus:not(:focus-visible),
+.markdown-body [role='tabpanel'][tabindex='0']:focus:not(:focus-visible),
 .markdown-body button:focus:not(:focus-visible),
 .markdown-body summary:focus:not(:focus-visible),
 .markdown-body a:focus:not(:focus-visible) {
@@ -1140,7 +1107,7 @@
   box-shadow: none;
 }
 
-.markdown-body [tabindex="0"]:focus:not(:focus-visible),
+.markdown-body [tabindex='0']:focus:not(:focus-visible),
 .markdown-body details-dialog:focus:not(:focus-visible) {
   outline: none;
 }
@@ -1148,7 +1115,7 @@
 .markdown-body g-emoji {
   display: inline-block;
   min-width: 1ch;
-  font-family: "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  font-family: 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
   font-size: 1em;
   font-style: normal !important;
   font-weight: var(--base-text-weight-normal, 400);
@@ -1195,9 +1162,7 @@
 }
 
 .markdown-body .contains-task-list:hover .task-list-item-convert-container,
-.markdown-body
-  .contains-task-list:focus-within
-  .task-list-item-convert-container {
+.markdown-body .contains-task-list:focus-within .task-list-item-convert-container {
   display: block;
   width: auto;
   height: 24px;

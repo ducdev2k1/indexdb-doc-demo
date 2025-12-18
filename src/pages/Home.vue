@@ -145,6 +145,46 @@
           </span>
         </div>
       </router-link>
+
+      <!-- Search Demo Card -->
+      <router-link
+        to="/demo/search"
+        class="group relative overflow-hidden rounded-2xl bg-white dark:bg-gray-800/50 p-8 shadow-xl hover:shadow-2xl transition-all duration-300 border border-gray-100 dark:border-gray-700/50 hover:-translate-y-1 md:col-span-2"
+      >
+        <div
+          class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-indigo-500/10 to-violet-500/10 rounded-full -translate-y-1/2 translate-x-1/2"
+        ></div>
+        <div class="relative">
+          <span class="text-4xl mb-4 block">🔍</span>
+          <h2
+            class="text-2xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors"
+          >
+            Demo Tìm Kiếm Nhanh (10k+ records)
+          </h2>
+          <p class="text-gray-600 dark:text-gray-300">
+            Tạo 10,000 bản ghi mẫu và trải nghiệm tốc độ tìm kiếm cực nhanh của
+            IndexedDB thông qua Indexing. Không bị đơ trình duyệt!
+          </p>
+          <span
+            class="inline-flex items-center mt-4 text-indigo-600 dark:text-indigo-400 font-medium group-hover:gap-2 transition-all"
+          >
+            Thử Tìm Kiếm
+            <svg
+              class="w-4 h-4 ml-1"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 5l7 7-7 7"
+              ></path>
+            </svg>
+          </span>
+        </div>
+      </router-link>
     </div>
   </div>
 </template>
