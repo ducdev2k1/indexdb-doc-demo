@@ -276,6 +276,42 @@ _Các loại Range khác:_
 - `IDBKeyRange.upperBound(50)`: Từ 50 tuổi trở xuống.
 - `IDBKeyRange.only(25)`: Đúng 25 tuổi.
 
+### 5.1. ⚠️ Giới hạn quan trọng của Index (Trade-offs)
+
+Index trong IndexedDB sử dụng cấu trúc **B-Tree**, giống SQL. Điều này mang lại tốc độ cực nhanh nhưng cũng có **giới hạn quan trọng**:
+
+| Loại tìm kiếm         | Index hỗ trợ? | Giải thích                                          |
+| :-------------------- | :-----------: | :-------------------------------------------------- |
+| **Exact Match** (=)   |      ✅       | Tìm `email = "a@example.com"` → Cực nhanh           |
+| **Prefix** (Bắt đầu)  |      ✅       | Tìm tên bắt đầu bằng "Nguyen" → Dùng `IDBKeyRange`  |
+| **Range** (Khoảng)    |      ✅       | Tìm tuổi từ 20-30 → Dùng `IDBKeyRange.bound()`      |
+| **Contains** (Chứa)   |      ❌       | Tìm tên **chứa** "an" → **Index KHÔNG hỗ trợ!**     |
+| **Suffix** (Kết thúc) |      ❌       | Tìm email kết thúc bằng "@gmail.com" → Không hỗ trợ |
+| **Regex/Fuzzy**       |      ❌       | Tìm kiếm mờ (fuzzy) → Không hỗ trợ                  |
+
+**💡 Ví dụ thực tế (Code trong Demo):**
+
+```typescript
+// ✅ INDEX CÓ THỂ LÀM (Siêu nhanh - O(log n))
+// Tìm tên BẮT ĐẦU bằng "nguyen"
+const range = IDBKeyRange.bound("nguyen", "nguyen" + "\uffff");
+const results = await db.getAllFromIndex("users", "by-name", range);
+
+// ❌ INDEX KHÔNG THỂ LÀM (Phải load hết rồi filter - O(n))
+// Tìm tên CHỨA "an" ở giữa (như "Tran", "Hoang", "Lan"...)
+const all = await db.getAll("users");
+const filtered = all.filter((u) => u.name.includes("an"));
+```
+
+**🤔 Khi nào dùng cái gì?**
+
+| Tình huống                            | Giải pháp                                                 |
+| :------------------------------------ | :-------------------------------------------------------- |
+| Data < 1,000 dòng                     | Dùng JS Filter (đơn giản, linh hoạt)                      |
+| Data > 10,000 dòng + Tìm Prefix/Range | Dùng **Index** (bắt buộc để có hiệu năng)                 |
+| Data lớn + Cần tìm kiếm "Contains"    | Lưu thêm trường `normalized` + Index hoặc dùng Web Worker |
+| Full-text search phức tạp             | Cân nhắc thư viện như **Fuse.js** hoặc backend API        |
+
 ---
 
 ## 6. Best Practices & "Bẫy" thường gặp ⚠️

@@ -14,6 +14,7 @@ declare module 'vue' {
     CodeBlock: typeof import('./components/CodeBlock.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    TableOfContents: typeof import('./components/TableOfContents.vue')['default']
     ThemeToggle: typeof import('./components/ThemeToggle.vue')['default']
   }
 }

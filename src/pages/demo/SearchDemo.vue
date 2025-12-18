@@ -1,69 +1,345 @@
+<template>
+  <div class="space-y-6">
+    <!-- Header Controls -->
+    <div
+      class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 dark:bg-gray-800 dark:border-gray-700"
+    >
+      <div
+        class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4"
+      >
+        <h2
+          class="text-xl font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2"
+        >
+          <span>🔍</span> Demo Sức Mạnh Index (50k bản ghi trong DB)
+        </h2>
+
+        <!-- Mode Switcher -->
+        <div
+          class="flex items-center bg-gray-100 dark:bg-gray-900 p-1 rounded-lg"
+        >
+          <button
+            @click="useIndex = false"
+            :class="
+              !useIndex
+                ? 'bg-white text-red-600 shadow-sm dark:bg-gray-700 dark:text-red-400'
+                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700'
+            "
+            class="px-4 py-2 rounded-md text-sm font-medium transition-all"
+          >
+            🐢 JS Filter (Load All)
+          </button>
+          <button
+            @click="useIndex = true"
+            :class="
+              useIndex
+                ? 'bg-white text-green-600 shadow-sm dark:bg-gray-700 dark:text-green-400'
+                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700'
+            "
+            class="px-4 py-2 rounded-md text-sm font-medium transition-all"
+          >
+            🚀 Index (Query Direct)
+          </button>
+        </div>
+      </div>
+
+      <!-- Controls Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <!-- Search Criteria -->
+        <div>
+          <label
+            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+            >Tìm theo</label
+          >
+          <select
+            v-model="searchCriteria"
+            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+          >
+            <option value="name">
+              Tên {{ useIndex ? "(Bắt đầu bằng)" : "(Chứa)" }}
+            </option>
+            <option value="age">Khoảng Tuổi</option>
+          </select>
+        </div>
+
+        <!-- Search Input -->
+        <div class="col-span-1 md:col-span-2">
+          <label
+            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+          >
+            {{
+              searchCriteria === "age" ? "Nhập khoảng tuổi" : "Từ khóa tìm kiếm"
+            }}
+          </label>
+
+          <!-- Input cho Tuổi (Range) -->
+          <div v-if="searchCriteria === 'age'" class="flex gap-2">
+            <input
+              v-model.number="minAge"
+              type="number"
+              placeholder="Min"
+              class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+            />
+            <span class="self-center">-</span>
+            <input
+              v-model.number="maxAge"
+              type="number"
+              placeholder="Max"
+              class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+            />
+          </div>
+
+          <!-- Input cho Text -->
+          <div v-else class="relative">
+            <input
+              v-model="searchQuery"
+              type="text"
+              placeholder="Nhập tên (VD: nguyen, tran, le)..."
+              class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none pl-10 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+            />
+            <span class="absolute left-3 top-2.5 text-gray-400">🔍</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="mt-4 flex flex-col md:flex-row gap-3 items-center">
+        <button
+          @click="generateData"
+          :disabled="isGenerating"
+          class="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-lg font-medium transition-colors disabled:opacity-50 flex items-center gap-2 w-full md:w-auto justify-center"
+        >
+          <span v-if="isGenerating">⏳ Đang tạo... {{ progress }}%</span>
+          <span v-else>⚡ Tạo 50,000 User vào DB</span>
+        </button>
+
+        <!-- Progress Bar -->
+        <div
+          v-if="isGenerating"
+          class="flex-1 w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700"
+        >
+          <div
+            class="bg-green-600 h-2.5 rounded-full transition-all duration-300"
+            :style="{ width: progress + '%' }"
+          ></div>
+        </div>
+
+        <!-- RAM Status -->
+        <div
+          class="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-2"
+        >
+          <span>💾 RAM:</span>
+          <span class="font-mono">{{ results.length }} items</span>
+          <span class="text-xs">(DB: {{ totalRecords.toLocaleString() }})</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div
+      v-if="searchTime !== null"
+      :class="
+        useIndex
+          ? 'bg-green-50 border-green-100 text-green-800 dark:bg-green-900/20 dark:border-green-800 dark:text-green-300'
+          : 'bg-red-50 border-red-100 text-red-800 dark:bg-red-900/20 dark:border-red-800 dark:text-red-300'
+      "
+      class="px-3 py-2 md:px-4 md:py-3 rounded-lg flex flex-col sm:flex-row items-start sm:items-center justify-between border gap-2"
+    >
+      <div class="flex items-center gap-3">
+        <span class="text-2xl">{{ useIndex ? "🚀" : "🐢" }}</span>
+        <div>
+          <div class="font-bold">
+            {{
+              useIndex
+                ? "Index Query (Chỉ lấy đúng cái cần)"
+                : "JS Filter (Load 50k rồi lọc)"
+            }}
+          </div>
+          <div class="text-sm opacity-80">
+            Tìm thấy {{ results.length.toLocaleString() }} kết quả
+            <span v-if="!useIndex" class="text-red-600 dark:text-red-400"
+              >(Đã load {{ loadedCount.toLocaleString() }} dòng vào RAM!)</span
+            >
+          </div>
+        </div>
+      </div>
+      <div class="text-right">
+        <div class="text-3xl font-bold">{{ searchTime.toFixed(2) }}ms</div>
+        <div class="text-xs font-mono opacity-70">Processing Time</div>
+      </div>
+    </div>
+
+    <!-- Virtual List Table -->
+    <div
+      class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden"
+    >
+      <!-- Scrollable Table Container -->
+      <div class="overflow-x-auto">
+        <!-- Table Header (Static) -->
+        <div
+          class="grid grid-cols-12 bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600 font-semibold text-gray-700 dark:text-gray-200 text-xs md:text-sm min-w-[600px]"
+        >
+          <div class="col-span-1 p-2 md:p-4">STT</div>
+          <div class="col-span-4 p-2 md:p-4">Tên</div>
+          <div class="col-span-4 p-2 md:p-4">Email</div>
+          <div class="col-span-2 p-2 md:p-4">Vai trò</div>
+          <div class="col-span-1 p-2 md:p-4">Tuổi</div>
+        </div>
+
+        <!-- Virtual Content -->
+        <div
+          v-bind="containerProps"
+          class="h-[500px] overflow-y-auto custom-scrollbar"
+        >
+          <div v-bind="wrapperProps">
+            <div
+              v-for="item in list"
+              :key="item.index"
+              class="grid grid-cols-12 border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors text-sm items-center"
+              style="height: 50px"
+            >
+              <div
+                class="col-span-1 px-4 truncate text-gray-500 dark:text-gray-400 font-mono text-xs"
+              >
+                {{ item.index + 1 }}
+              </div>
+              <div
+                class="col-span-4 px-4 font-medium text-gray-900 dark:text-gray-100 truncate"
+              >
+                {{ item.data.name }}
+              </div>
+              <div
+                class="col-span-4 px-4 text-gray-600 dark:text-gray-300 truncate"
+              >
+                {{ item.data.email }}
+              </div>
+              <div class="col-span-2 px-4">
+                <span
+                  :class="{
+                    'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300':
+                      item.data.role === 'admin',
+                    'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300':
+                      item.data.role === 'user',
+                    'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300':
+                      item.data.role === 'guest',
+                  }"
+                  class="px-2 py-1 rounded-full text-xs font-medium capitalize"
+                >
+                  {{ item.data.role }}
+                </span>
+              </div>
+              <div class="col-span-1 px-4 text-gray-600 dark:text-gray-400">
+                {{ item.data.age }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      <div
+        v-if="results.length === 0 && !isSearching"
+        class="p-8 text-center text-gray-500 dark:text-gray-400"
+      >
+        <div class="text-4xl mb-2">📦</div>
+        <div>
+          RAM trống.<br />
+          <span v-if="totalRecords > 0"
+            >{{ totalRecords.toLocaleString() }} bản ghi đang nằm trong
+            IndexedDB.</span
+          >
+          <span v-else>Hãy tạo dữ liệu trước!</span>
+        </div>
+      </div>
+
+      <!-- Loading State -->
+      <div
+        v-if="isSearching"
+        class="p-8 text-center text-gray-500 dark:text-gray-400"
+      >
+        <div class="text-4xl mb-2 animate-pulse">⏳</div>
+        <div>Đang tải dữ liệu...</div>
+      </div>
+    </div>
+  </div>
+</template>
+
 <script setup lang="ts">
+import { useVirtualList } from "@vueuse/core";
 import { openDB, type DBSchema } from "idb";
 import { onMounted, ref, watch } from "vue";
 
-// 1. Định nghĩa cấu trúc dữ liệu và DB
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  role: "admin" | "user" | "guest";
-  age: number;
-}
-
+// Interface DB
 interface SearchDB extends DBSchema {
   users: {
     key: string;
-    value: User;
+    value: {
+      id: string;
+      name: string;
+      name_normalized: string;
+      email: string;
+      role: "admin" | "user" | "guest";
+      age: number;
+    };
     indexes: {
-      "by-name": string;
       "by-role": string;
       "by-age": number;
-      "by-email": string;
+      "by-name-normalized": string;
     };
   };
 }
 
-const dbPromise = openDB<SearchDB>("search-demo-db", 2, {
+const dbPromise = openDB<SearchDB>("search-demo-db", 5, {
   upgrade(db, oldVersion, _newVersion, transaction) {
     let store;
     if (oldVersion === 0) {
       store = db.createObjectStore("users", { keyPath: "id" });
-      store.createIndex("by-name", "name");
       store.createIndex("by-role", "role");
       store.createIndex("by-age", "age");
+      store.createIndex("by-name-normalized", "name_normalized");
     } else {
       store = transaction.objectStore("users");
-    }
-
-    if (!store.indexNames.contains("by-email")) {
-      store.createIndex("by-email", "email");
+      if (!store.indexNames.contains("by-name-normalized")) {
+        store.createIndex("by-name-normalized", "name_normalized");
+      }
     }
   },
 });
 
-// 2. State
-// 2. State
+// State
 const searchQuery = ref("");
-const searchRole = ref<"all" | "admin" | "user" | "guest">("all");
-const searchCriteria = ref<"name" | "email" | "age">("name");
-const results = ref<User[]>([]);
+const minAge = ref<number>(25);
+const maxAge = ref<number>(30);
+const searchCriteria = ref<"name" | "age">("name");
+const useIndex = ref(true);
+const progress = ref(0);
+
+const results = ref<any[]>([]);
 const totalRecords = ref(0);
+const loadedCount = ref(0); // Số lượng đã load vào RAM (cho JS Filter)
 const isGenerating = ref(false);
+const isSearching = ref(false);
 const searchTime = ref<number | null>(null);
 
-// 3. Hàm tạo dữ liệu mẫu lớn (10,000 records)
+// Virtual List Setup
+const { list, containerProps, wrapperProps } = useVirtualList(results, {
+  itemHeight: 50,
+});
+
+const countRecords = async () => {
+  const db = await dbPromise;
+  totalRecords.value = await db.count("users");
+};
+
+// Tạo dữ liệu Mock (50k records) -> Lưu DB -> Xóa RAM
 const generateData = async () => {
   isGenerating.value = true;
+  progress.value = 0;
   const db = await dbPromise;
-  const tx = db.transaction("users", "readwrite");
-  const store = tx.objectStore("users");
 
-  // Xóa cũ trước
-  await store.clear();
+  await db.clear("users");
 
-  const roles: ("admin" | "user" | "guest")[] = ["admin", "user", "guest"];
-  const firstNames = [
+  const roles = ["admin", "user", "guest"] as const;
+  const hovaten = [
     "Nguyen",
     "Tran",
     "Le",
@@ -75,338 +351,138 @@ const generateData = async () => {
     "Vo",
     "Dang",
   ];
-  const lastNames = [
-    "Van",
-    "Thi",
-    "Minh",
-    "Quoc",
-    "Tuan",
-    "Anh",
-    "Duc",
-    "Phuong",
-    "Thao",
-    "Hieu",
-  ];
-  const endNames = [
-    "A",
-    "B",
-    "C",
-    "X",
-    "Y",
-    "Z",
-    "Hung",
+  const ten = [
+    "An",
+    "Binh",
+    "Cuong",
     "Dung",
-    "Thinh",
-    "Long",
+    "Giang",
+    "Hung",
+    "Khanh",
+    "Lan",
+    "Minh",
+    "Nam",
   ];
 
-  const users: User[] = [];
+  const batchSize = 10000;
+  const totalRecordCount = 50000;
+  const totalBatches = Math.ceil(totalRecordCount / batchSize);
 
-  // Tạo 10,000 user
-  for (let i = 0; i < 10000; i++) {
-    const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
-    const middleName = lastNames[Math.floor(Math.random() * lastNames.length)];
-    const lastName = endNames[Math.floor(Math.random() * endNames.length)];
-    const fullName = `${firstName} ${middleName} ${lastName}`;
+  for (let b = 0; b < totalBatches; b++) {
+    const tx = db.transaction("users", "readwrite");
+    const promises = [];
 
-    users.push({
-      id: crypto.randomUUID(),
-      name: fullName,
-      email: `user${i}@example.com`,
-      role: roles[Math.floor(Math.random() * roles.length)] as
-        | "admin"
-        | "user"
-        | "guest",
-      age: Math.floor(Math.random() * 60) + 18,
-    });
+    for (let i = 0; i < batchSize; i++) {
+      const ho = hovaten[Math.floor(Math.random() * hovaten.length)];
+      const t = ten[Math.floor(Math.random() * ten.length)]!;
+      const fullName = `${ho} ${t} ${Math.floor(Math.random() * 10000)}`;
+      const age = Math.floor(Math.random() * 50) + 18;
+
+      promises.push(
+        tx.store.add({
+          id: crypto.randomUUID(),
+          name: fullName,
+          name_normalized: fullName.toLowerCase(),
+          email: `${t.toLowerCase()}.${b * batchSize + i}@example.com`,
+          role: roles[Math.floor(Math.random() * roles.length)]!,
+          age: age,
+        })
+      );
+    }
+
+    await Promise.all([...promises, tx.done]);
+    progress.value = Math.round(((b + 1) / totalBatches) * 100);
+    await new Promise((r) => setTimeout(r, 0));
   }
-
-  // Batch insert cho nhanh
-  await Promise.all(users.map((u) => store.add(u)));
-  await tx.done;
 
   isGenerating.value = false;
   await countRecords();
-  alert("Đã tạo xong 10,000 bản ghi!");
+
+  // QUAN TRỌNG: Sau khi lưu xong, XÓA SẠCH RAM
+  results.value = [];
+  loadedCount.value = 0;
+  searchTime.value = null;
 };
 
-const countRecords = async () => {
-  const db = await dbPromise;
-  totalRecords.value = await db.count("users");
-};
-
-// 4. Tìm kiếm sử dụng Index
-// 4. Tìm kiếm sử dụng Index
+// Tìm kiếm (Logic Core)
 const handleSearch = async () => {
+  if (!searchQuery.value && searchCriteria.value === "name") return;
+
+  isSearching.value = true;
+  searchTime.value = null;
+  loadedCount.value = 0;
+
+  await new Promise((r) => setTimeout(r, 50)); // Cho UI kịp render loading
   const start = performance.now();
+
   const db = await dbPromise;
+  let foundUsers: any[] = [];
 
-  let foundUsers: User[] = [];
+  const queryLower = searchQuery.value.toLowerCase();
 
-  // Logic tìm kiếm kết hợp
-  // Nếu có chọn Role, ta ưu tiên filter theo Role bằng Index trước (vì số lượng ít hơn toàn bộ DB)
-  if (searchRole.value !== "all") {
-    // 1. Lấy tất cả user thuộc Role (dùng Index -> Nhanh)
-    let byRole = await db.getAllFromIndex(
-      "users",
-      "by-role",
-      searchRole.value as "admin" | "user" | "guest"
-    );
+  // --- CASE 1: JS FILTER (Load 50k vào RAM rồi lọc) ---
+  if (!useIndex.value) {
+    // Bước 1: Load TOÀN BỘ 50k từ IndexedDB lên RAM
+    const allUsers = await db.getAll("users");
+    loadedCount.value = allUsers.length; // Ghi lại số lượng đã load
 
-    // 2. Filter tiếp theo Search Query (trên RAM)
-    if (searchQuery.value) {
-      const q = searchQuery.value.toLowerCase();
-      if (searchCriteria.value === "name") {
-        byRole = byRole.filter((u) => u.name.toLowerCase().includes(q));
-      } else if (searchCriteria.value === "email") {
-        byRole = byRole.filter((u) => u.email.toLowerCase().includes(q));
-      } else if (searchCriteria.value === "age") {
-        byRole = byRole.filter((u) => u.age.toString() === q);
-      }
-    }
-    foundUsers = byRole;
-  } else if (searchQuery.value) {
-    // Nếu không chọn Role, tìm query trực tiếp
-    // Tối ưu: Dùng Index tương ứng nếu có thể
-
-    if (searchCriteria.value === "email") {
-      // Tìm chính xác Email (hoặc range nếu cần, ở đây demo chính xác hoặc filter)
-      // Index 'by-email' hữu dụng cho exact match
-      // Nếu user nhập "user1@example.com" -> Hit Index ngay
-      if (searchQuery.value.includes("@")) {
-        // Giả sử tìm chính xác
-        const res = await db.getFromIndex(
-          "users",
-          "by-email",
-          searchQuery.value
-        );
-        foundUsers = res ? [res] : [];
-      } else {
-        // Tìm gần đúng (Contains) -> Index không hỗ trợ contains 'giữa chuỗi' tốt
-        // Phải scan toàn bộ hoặc scan cursor.
-        // Để demo nhanh: Scan all
-        const all = await db.getAll("users");
-        foundUsers = all.filter((u) =>
-          u.email.toLowerCase().includes(searchQuery.value.toLowerCase())
-        );
-      }
-    } else if (searchCriteria.value === "age") {
-      // Tìm chính xác Tuổi bằng Index -> CỰC NHANH
-      const age = parseInt(searchQuery.value);
-      if (!isNaN(age)) {
-        foundUsers = await db.getAllFromIndex("users", "by-age", age);
-      }
+    // Bước 2: Filter bằng JS (O(n))
+    if (searchCriteria.value === "age") {
+      foundUsers = allUsers.filter(
+        (u) => u.age >= minAge.value && u.age <= maxAge.value
+      );
     } else {
-      // Tìm theo Tên (Contains) -> Scan all
-      const all = await db.getAll("users");
-      foundUsers = all.filter((u) =>
-        u.name.toLowerCase().includes(searchQuery.value.toLowerCase())
+      foundUsers = allUsers.filter((u) =>
+        u.name_normalized.includes(queryLower)
       );
     }
-  } else {
-    // Không search gì cả -> Lấy 50 bản ghi đầu
-    const tx = db.transaction("users");
-    let cursor = await tx.store.openCursor();
-    while (cursor && foundUsers.length < 50) {
-      foundUsers.push(cursor.value);
-      cursor = await cursor.continue();
+  }
+  // --- CASE 2: INDEX QUERY (Chỉ lấy đúng cái cần) ---
+  else {
+    if (searchCriteria.value === "age") {
+      const range = IDBKeyRange.bound(minAge.value, maxAge.value);
+      foundUsers = await db.getAllFromIndex("users", "by-age", range);
+    } else {
+      // Prefix search trực tiếp trên Index
+      const range = IDBKeyRange.bound(queryLower, queryLower + "\uffff");
+      foundUsers = await db.getAllFromIndex(
+        "users",
+        "by-name-normalized",
+        range
+      );
     }
+    loadedCount.value = foundUsers.length; // Chỉ load đúng số này
   }
 
-  // Giới hạn hiển thị 100 kết quả để không đơ DOM
-  results.value = foundUsers.slice(0, 100);
+  results.value = foundUsers;
   searchTime.value = performance.now() - start;
+  isSearching.value = false;
 };
 
-// Tự động search khi input đổi (debounce nhẹ)
-let timeout: any;
-watch([searchQuery, searchRole, searchCriteria], () => {
+// Auto Search with debounce
+let timeout: ReturnType<typeof setTimeout>;
+watch([searchQuery, minAge, maxAge, searchCriteria, useIndex], () => {
   clearTimeout(timeout);
   timeout = setTimeout(handleSearch, 300);
 });
 
 onMounted(() => {
   countRecords();
-  handleSearch();
 });
 </script>
 
-<template>
-  <div class="space-y-8">
-    <!-- Header -->
-    <div>
-      <h1
-        class="text-3xl font-bold bg-gradient-to-r from-purple-500 to-indigo-600 bg-clip-text text-transparent"
-      >
-        🔍 Demo Tìm Kiếm Nhanh (Indexing)
-      </h1>
-      <p class="text-gray-600 dark:text-gray-400 mt-2">
-        Trải nghiệm sức mạnh của Index trong IndexedDB với 10,000 bản ghi.
-      </p>
-    </div>
-
-    <!-- Stats & Generator -->
-    <div
-      class="flex flex-wrap items-center justify-between gap-4 p-6 rounded-2xl bg-white dark:bg-gray-800 shadow-lg border border-gray-200 dark:border-gray-700"
-    >
-      <div>
-        <div class="text-sm text-gray-500 dark:text-gray-400">
-          Tổng số bản ghi
-        </div>
-        <div class="text-3xl font-bold text-gray-900 dark:text-white">
-          {{ totalRecords.toLocaleString() }}
-        </div>
-      </div>
-
-      <button
-        @click="generateData"
-        :disabled="isGenerating"
-        class="flex items-center gap-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-      >
-        <span v-if="isGenerating" class="animate-spin">⏳</span>
-        <span v-else>⚡</span>
-        {{ isGenerating ? "Đang tạo dữ liệu..." : "Tạo 10,000 User Mẫu" }}
-      </button>
-    </div>
-
-    <!-- Search Controls -->
-    <div class="space-y-4">
-      <div class="flex flex-col md:flex-row gap-4">
-        <!-- Search Criteria -->
-        <select
-          v-model="searchCriteria"
-          class="w-full md:w-32 px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all cursor-pointer font-medium"
-        >
-          <option value="name">Tên</option>
-          <option value="email">Email</option>
-          <option value="age">Tuổi</option>
-        </select>
-
-        <!-- Input Search -->
-        <div class="flex-1 relative">
-          <input
-            v-model="searchQuery"
-            :type="searchCriteria === 'age' ? 'number' : 'text'"
-            :placeholder="
-              searchCriteria === 'name'
-                ? 'Tìm theo tên...'
-                : searchCriteria === 'email'
-                ? 'Nhập email (vd: user1@example.com)'
-                : 'Nhập tuổi chính xác...'
-            "
-            class="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
-          />
-          <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-            >🔍</span
-          >
-        </div>
-
-        <!-- Filter Role -->
-        <select
-          v-model="searchRole"
-          class="w-full md:w-40 px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all cursor-pointer"
-        >
-          <option value="all">Tất cả vai trò</option>
-          <option value="admin">Admin</option>
-          <option value="user">User</option>
-          <option value="guest">Guest</option>
-        </select>
-      </div>
-
-      <!-- Performance Metrics -->
-      <div
-        v-if="searchTime !== null"
-        class="text-sm text-gray-500 dark:text-gray-400 text-right"
-      >
-        Tìm thấy {{ results.length }} kết quả trong
-        <span class="font-bold text-indigo-500"
-          >{{ searchTime.toFixed(2) }}ms</span
-        >
-      </div>
-    </div>
-
-    <!-- Results Table -->
-    <div
-      class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm"
-    >
-      <div class="overflow-x-auto">
-        <table class="!w-full !inline-table text-left text-sm">
-          <thead
-            class="bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700"
-          >
-            <tr>
-              <th class="px-6 py-4 font-semibold text-gray-900 dark:text-white">
-                ID
-              </th>
-              <th class="px-6 py-4 font-semibold text-gray-900 dark:text-white">
-                Họ Tên
-              </th>
-              <th class="px-6 py-4 font-semibold text-gray-900 dark:text-white">
-                Vai trò
-              </th>
-              <th class="px-6 py-4 font-semibold text-gray-900 dark:text-white">
-                Tuổi
-              </th>
-              <th class="px-6 py-4 font-semibold text-gray-900 dark:text-white">
-                Email
-              </th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-            <tr
-              v-for="user in results"
-              :key="user.id"
-              class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
-            >
-              <td class="px-6 py-3 font-mono text-xs text-gray-500">
-                {{ user.id.slice(0, 8) }}...
-              </td>
-              <td
-                class="px-6 py-3 font-medium text-gray-900 dark:text-gray-100"
-              >
-                {{ user.name }}
-              </td>
-              <td class="px-6 py-3">
-                <span
-                  class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
-                  :class="{
-                    'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300':
-                      user.role === 'admin',
-                    'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300':
-                      user.role === 'user',
-                    'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300':
-                      user.role === 'guest',
-                  }"
-                >
-                  {{ user.role }}
-                </span>
-              </td>
-              <td class="px-6 py-3 text-gray-500 dark:text-gray-400">
-                {{ user.age }}
-              </td>
-              <td class="px-6 py-3 text-gray-500 dark:text-gray-400">
-                {{ user.email }}
-              </td>
-            </tr>
-            <tr v-if="results.length === 0">
-              <td
-                colspan="5"
-                class="px-6 py-8 text-center text-gray-500 dark:text-gray-400"
-              >
-                Không tìm thấy kết quả nào.
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- Info -->
-    <div
-      class="p-4 rounded-xl bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-300 text-sm border border-blue-100 dark:border-blue-800"
-    >
-      ℹ️ <strong>Mẹo:</strong> Thử tạo 10,000 bản ghi và tìm kiếm. Bạn sẽ thấy
-      IndexedDB xử lý cực nhanh nhờ Index (đặc biệt khi filter theo Role).
-    </div>
-  </div>
-</template>
+<style scoped>
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+</style>
