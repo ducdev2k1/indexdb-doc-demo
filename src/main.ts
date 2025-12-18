@@ -1,8 +1,10 @@
 import { createHead } from "@unhead/vue";
+import "prismjs/themes/prism-tomorrow.css";
 import { createApp } from "vue";
 import App from "./App.vue";
 import router from "./router";
 import "./style.css";
+import "./assets/markdown.css";
 
 const app = createApp(App);
 const head = createHead();

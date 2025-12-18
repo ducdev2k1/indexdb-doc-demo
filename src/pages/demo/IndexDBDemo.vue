@@ -89,10 +89,10 @@ const loadSavedData = async () => {
       <h1
         class="text-3xl font-bold bg-gradient-to-r from-green-500 to-teal-600 bg-clip-text text-transparent"
       >
-        📝 Form Caching Demo
+        📝 Demo Cache Form
       </h1>
       <p class="text-gray-600 dark:text-gray-400 mt-2">
-        Your form data is automatically saved to IndexedDB as you type.
+        Dữ liệu form của bạn được tự động lưu vào IndexedDB khi bạn gõ.
       </p>
     </div>
 
@@ -123,14 +123,14 @@ const loadSavedData = async () => {
         >
           {{
             status === "saved"
-              ? "Auto-saved"
+              ? "Đã tự động lưu"
               : status === "restored"
-              ? "Data Restored"
-              : "Cache Cleared"
+              ? "Đã khôi phục dữ liệu"
+              : "Đã xóa Cache"
           }}
         </div>
         <div v-if="lastSaved" class="text-sm text-gray-500 dark:text-gray-400">
-          Last saved at {{ lastSaved }}
+          Lưu lần cuối lúc {{ lastSaved }}
         </div>
       </div>
     </div>
@@ -144,14 +144,14 @@ const loadSavedData = async () => {
         <label
           class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
         >
-          Display Name
+          Tên hiển thị
         </label>
         <input
           v-model="form.name"
           @input="saveToCache"
           type="text"
           class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all"
-          placeholder="Enter your name..."
+          placeholder="Nhập tên của bạn..."
         />
       </div>
 
@@ -159,14 +159,14 @@ const loadSavedData = async () => {
         <label
           class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
         >
-          Email Address
+          Địa chỉ Email
         </label>
         <input
           v-model="form.email"
           @input="saveToCache"
           type="email"
           class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all"
-          placeholder="you@example.com"
+          placeholder="email@vidu.com"
         />
       </div>
 
@@ -174,14 +174,14 @@ const loadSavedData = async () => {
         <label
           class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
         >
-          Notes
+          Ghi chú
         </label>
         <textarea
           v-model="form.note"
           @input="saveToCache"
           rows="4"
           class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all resize-none"
-          placeholder="Write something..."
+          placeholder="Viết gì đó..."
         ></textarea>
       </div>
 
@@ -190,14 +190,14 @@ const loadSavedData = async () => {
           type="submit"
           class="flex-1 px-6 py-3 bg-gradient-to-r from-green-500 to-teal-600 text-white rounded-xl font-medium hover:shadow-lg hover:shadow-green-500/25 transition-all hover:-translate-y-0.5"
         >
-          Submit Form
+          Gửi Form
         </button>
         <button
           type="button"
           @click="clearCache"
           class="px-6 py-3 border border-red-200 dark:border-red-700 text-red-600 dark:text-red-400 rounded-xl font-medium hover:bg-red-50 dark:hover:bg-red-900/20 transition-all"
         >
-          Clear Cache
+          Xóa Cache
         </button>
       </div>
     </form>
@@ -210,7 +210,7 @@ const loadSavedData = async () => {
         class="px-6 py-4 border-b border-gray-200/50 dark:border-gray-700/50 flex items-center justify-between"
       >
         <h3 class="font-semibold text-gray-900 dark:text-white">
-          📦 IndexedDB Contents
+          📦 Dữ liệu trong IndexedDB
         </h3>
         <button
           @click="loadSavedData"
@@ -229,12 +229,12 @@ const loadSavedData = async () => {
               d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
             ></path>
           </svg>
-          Refresh
+          Làm mới
         </button>
       </div>
       <pre
         class="p-6 text-sm text-gray-300 bg-gray-900 overflow-auto max-h-64"
-      ><code>{{ savedData ? JSON.stringify(savedData, null, 2) : 'No data cached' }}</code></pre>
+      ><code>{{ savedData ? JSON.stringify(savedData, null, 2) : 'Chưa có dữ liệu cache' }}</code></pre>
     </div>
 
     <!-- Info Card -->
@@ -242,13 +242,15 @@ const loadSavedData = async () => {
       class="p-6 rounded-2xl bg-gradient-to-r from-green-50 to-teal-50 dark:from-green-900/20 dark:to-teal-900/20 border border-green-200/50 dark:border-green-700/30"
     >
       <h3 class="font-bold text-lg text-green-800 dark:text-green-300 mb-2">
-        💡 How It Works
+        💡 Cách hoạt động
       </h3>
       <ul class="space-y-2 text-green-700 dark:text-green-400 text-sm">
-        <li>• Every keystroke triggers an auto-save to IndexedDB</li>
-        <li>• Data persists across page reloads and browser sessions</li>
-        <li>• Works completely offline once loaded</li>
-        <li>• Clear the cache to reset and start fresh</li>
+        <li>• Mỗi lần gõ phím sẽ kích hoạt tự động lưu vào IndexedDB</li>
+        <li>
+          • Dữ liệu tồn tại qua các lần tải lại trang và phiên trình duyệt
+        </li>
+        <li>• Hoạt động hoàn toàn offline sau khi tải</li>
+        <li>• Xóa cache để reset và bắt đầu lại</li>
       </ul>
     </div>
   </div>

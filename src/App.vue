@@ -1,5 +1,8 @@
 <script setup lang="ts">
+import { computed } from "vue";
 import ThemeToggle from "./components/ThemeToggle.vue";
+
+const theme = computed(() => localStorage.getItem("theme") || "dark");
 </script>
 
 <template>
@@ -26,7 +29,7 @@ import ThemeToggle from "./components/ThemeToggle.vue";
             to="/"
             class="relative px-3 py-2 font-medium text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors group"
           >
-            Home
+            Trang chủ
             <span
               class="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-600 dark:bg-blue-400 group-hover:w-full transition-all duration-300"
             ></span>
@@ -35,7 +38,7 @@ import ThemeToggle from "./components/ThemeToggle.vue";
             to="/docs/indexdb"
             class="relative px-3 py-2 font-medium text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors group"
           >
-            Documentation
+            Tài liệu
             <span
               class="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-600 dark:bg-blue-400 group-hover:w-full transition-all duration-300"
             ></span>
@@ -44,7 +47,7 @@ import ThemeToggle from "./components/ThemeToggle.vue";
             to="/demo/indexdb"
             class="relative px-3 py-2 font-medium text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors group"
           >
-            Form Demo
+            Demo Form
             <span
               class="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-600 dark:bg-blue-400 group-hover:w-full transition-all duration-300"
             ></span>
@@ -53,7 +56,7 @@ import ThemeToggle from "./components/ThemeToggle.vue";
             to="/demo/gallery"
             class="relative px-3 py-2 font-medium text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors group"
           >
-            Image Gallery
+            Demo Ảnh
             <span
               class="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-600 dark:bg-blue-400 group-hover:w-full transition-all duration-300"
             ></span>
@@ -65,7 +68,7 @@ import ThemeToggle from "./components/ThemeToggle.vue";
 
     <!-- Main content -->
     <main class="max-w-6xl mx-auto px-6 py-10">
-      <router-view />
+      <router-view class="markdown-body" :data-theme="theme" />
     </main>
 
     <!-- Footer -->
@@ -75,7 +78,7 @@ import ThemeToggle from "./components/ThemeToggle.vue";
       <div
         class="max-w-6xl mx-auto px-6 py-6 text-center text-sm text-gray-500 dark:text-gray-400"
       >
-        Built with Vue 3 + TypeScript + idb • IndexedDB Demo & Documentation
+        Xây dựng với Vue 3 + TypeScript + idb • IndexedDB Demo & Documentation
       </div>
     </footer>
   </div>

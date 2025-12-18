@@ -12,6 +12,8 @@ export default defineConfig({
       include: [/\.vue$/, /\.md$/],
     }),
     Markdown({
+      wrapperClasses:
+        "prose prose-lg dark:prose-invert max-w-4xl mx-auto py-8 px-6",
       markdownItUses: [Prism],
       markdownItSetup(md) {
         const defaultFence =

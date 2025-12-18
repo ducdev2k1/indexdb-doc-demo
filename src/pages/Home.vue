@@ -9,13 +9,12 @@
       ></div>
       <div class="relative z-10">
         <h1 class="text-4xl md:text-5xl font-bold mb-4">
-          Welcome to IndexedDB Guide 💾
+          Chào mừng đến với Hướng dẫn IndexedDB 💾
         </h1>
         <p class="text-lg md:text-xl text-blue-100 max-w-2xl">
-          Learn how to leverage browser-based storage with TypeScript and the
-          powerful
-          <code class="bg-white/20 px-2 py-1 rounded">idb</code> library for
-          offline-first applications.
+          Tìm hiểu cách tận dụng bộ nhớ trình duyệt với TypeScript và thư viện
+          <code class="bg-white/20 px-2 py-1 rounded">idb</code> mạnh mẽ cho các
+          ứng dụng offline-first.
         </p>
       </div>
     </div>
@@ -35,20 +34,21 @@
           <h2
             class="text-2xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors"
           >
-            Documentation
+            Tài liệu hướng dẫn
           </h2>
           <p class="text-gray-600 dark:text-gray-300">
-            Comprehensive guide on using IndexedDB with
+            Hướng dẫn toàn diện về cách sử dụng IndexedDB với
             <code
               class="bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 rounded text-sm"
               >idb</code
             >
-            and TypeScript. Learn setup, CRUD operations, and best practices.
+            và TypeScript. Học cách cài đặt, thao tác CRUD và các best
+            practices.
           </p>
           <span
             class="inline-flex items-center mt-4 text-blue-600 dark:text-blue-400 font-medium group-hover:gap-2 transition-all"
           >
-            Read the docs
+            Đọc tài liệu
             <svg
               class="w-4 h-4 ml-1"
               fill="none"
@@ -79,16 +79,16 @@
           <h2
             class="text-2xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors"
           >
-            Form Caching Demo
+            Demo Cache Form
           </h2>
           <p class="text-gray-600 dark:text-gray-300">
-            Experience auto-saving form data to IndexedDB. Your input persists
-            through page reloads and browser sessions.
+            Trải nghiệm tự động lưu dữ liệu form vào IndexedDB. Dữ liệu của bạn
+            vẫn còn nguyên ngay cả khi tải lại trang hoặc tắt trình duyệt.
           </p>
           <span
             class="inline-flex items-center mt-4 text-green-600 dark:text-green-400 font-medium group-hover:gap-2 transition-all"
           >
-            Try it now
+            Thử ngay
             <svg
               class="w-4 h-4 ml-1"
               fill="none"
@@ -119,16 +119,16 @@
           <h2
             class="text-2xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors"
           >
-            Image Gallery Cache Demo
+            Demo Cache Hình Ảnh
           </h2>
           <p class="text-gray-600 dark:text-gray-300">
-            Fetch images from Picsum API and cache them in IndexedDB. Images
-            load instantly on revisit, even offline!
+            Tải ảnh từ Picsum API và cache chúng vào IndexedDB. Ảnh tải ngay lập
+            tức khi vào lại, ngay cả khi không có mạng!
           </p>
           <span
             class="inline-flex items-center mt-4 text-amber-600 dark:text-amber-400 font-medium group-hover:gap-2 transition-all"
           >
-            View Gallery
+            Xem bộ sưu tập
             <svg
               class="w-4 h-4 ml-1"
               fill="none"
