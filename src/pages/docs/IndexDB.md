@@ -38,7 +38,7 @@ Mặc dù IndexedDB rất mạnh, nhưng không phải là "viên đạn bạc" 
 2.  **Khó Debug**: DevTools hỗ trợ xem dữ liệu nhưng khó thao tác sửa/xóa nhanh như LocalStorage.
 3.  **Tương thích**: Các trình duyệt rất cũ có thể hỗ trợ không đầy đủ (nhưng hiện tại >99% đã Ok).
 4.  **Vấn đề Quota**: Nếu ổ cứng đầy, trình duyệt có thể tự xóa dữ liệu để giải phóng bộ nhớ (ít gặp nhưng có thể xảy ra).
-
+5.  **Dữ liệu không được mã hóa**: IndexedDB lưu trữ dữ liệu dạng plaintext. Bất kỳ ai có quyền truy cập vào máy tính hoặc DevTools đều có thể đọc được dữ liệu. Không nên lưu thông tin nhạy cảm (mật khẩu, token, thông tin cá nhân quan trọng) mà không mã hóa trước.
 ---
 
 ## 2. Tư duy cốt lõi (Core Concepts) 🧠
